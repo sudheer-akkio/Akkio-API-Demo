@@ -108,9 +108,9 @@ def import_data(filepath):
     return dict_list
 
 
-def send_dataset_api_request(dataset_id, input_data):
+def add_rows_to_dataset(dataset_id, input_data):
     """
-    Make API request
+    Make API request to add rows to existing dataset
 
     Returns:
         dict: json response
@@ -127,6 +127,36 @@ def send_dataset_api_request(dataset_id, input_data):
 
     print(
         f"Request to add rows to dataset {dataset_id} with {len(input_data)} samples completed in {elapsed_time:.4f} seconds."
+    )
+
+    return response.json()
+
+
+def make_prediction(model_id, input_data, explain=False, show_factors=False):
+    """
+    Make API request for inference on new data
+
+    Returns:
+        dict: json response
+    """
+    start_time = time.time()
+    response = requests.post(
+        "{}://{}:{}/{}/models".format(PROTOCOL, URL, PORT, VERSION),
+        json={
+            "api_key": API_KEY,
+            "id": model_id,
+            "data": input_data,
+            "explain": explain,
+            "show_factors": show_factors,
+        },
+        timeout=120,
+    )
+    end_time = time.time()
+
+    elapsed_time = end_time - start_time
+
+    print(
+        f"Request to make predictions {model_id} with {len(input_data)} samples completed in {elapsed_time:.4f} seconds."
     )
 
     return response.json()

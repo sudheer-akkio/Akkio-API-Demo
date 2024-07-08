@@ -132,7 +132,7 @@ def add_rows_to_dataset(dataset_id, input_data):
     return response.json()
 
 
-def make_prediction(model_id, input_data, explain=False, show_factors=False):
+def make_prediction(model_id, input_data, show_factors=False, save=False):
     """
     Make API request for inference on new data
 
@@ -144,9 +144,9 @@ def make_prediction(model_id, input_data, explain=False, show_factors=False):
         "{}://{}:{}/{}/models".format(PROTOCOL, URL, PORT, VERSION),
         json={
             "api_key": API_KEY,
+            "sample": True,
             "id": model_id,
             "data": input_data,
-            "explain": explain,
             "show_factors": show_factors,
         },
         timeout=120,
@@ -159,7 +159,33 @@ def make_prediction(model_id, input_data, explain=False, show_factors=False):
         f"Request to make predictions {model_id} with {len(input_data)} samples completed in {elapsed_time:.4f} seconds."
     )
 
-    return response.json()
+    # Check for HTTP errors
+    response.raise_for_status()
+
+    # Parse JSON response
+    resp_dict = response.json()
+
+    # Check for application level errors
+    if resp_dict.get("status") == "error":
+        raise Exception(
+            f"Error from API: {resp_dict.get('message', 'No error message provided')}"
+        )
+
+    if save:
+        file_path = "predictions.csv"
+
+        print(f"Saving prediction to disk to {file_path}")
+
+        if "predictions" in resp_dict.keys():
+            df = pd.DataFrame(resp_dict["predictions"])
+        else:
+            df = pd.DataFrame(resp_dict)
+
+        df.to_csv(file_path, index=False)
+
+        print("Done!")
+
+    return resp_dict
 
 
 if __name__ == "__main__":

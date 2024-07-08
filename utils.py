@@ -3,7 +3,7 @@ import time
 
 import pandas as pd
 import requests
-from sklearn.model_selection import TimeSeriesSplit, train_test_split
+from sklearn.model_selection import train_test_split
 
 API_KEY = None
 BASE_URL = "api.akkio.com/api"

@@ -286,3 +286,52 @@ def make_prediction(
         print("Done!")
 
     return resp_dict
+
+
+def set_dataset_fields(dataset_id, fields):
+    """
+    Make API request to set dataset fields
+
+    Returns:
+        dict: json response
+    """
+
+    # filed column type options are below
+    # - category
+    # - id
+    # - integer
+    # - float
+    # - string
+    # - date
+    # - unknown (maps to disabled)
+
+    # input data must look like this
+    # fields = [
+    #     {
+    #         'name': {column1_name},
+    #         'type': {column1_type},
+    #         'valid': true
+    #     },
+    #     {
+    #         'name': {column2_name},
+    #         'type': {column2_type},
+    #         'valid': true
+    #     },
+    #     ...
+    # ]
+
+    start_time = time.time()
+    response = requests.post(
+        "{}://{}:{}/{}/datasets".format(PROTOCOL, URL, PORT, VERSION),
+        json={"api_key": API_KEY, "id": dataset_id, "fields": fields},
+        timeout=120,
+    )
+    end_time = time.time()
+
+    elapsed_time = end_time - start_time
+
+    print(
+        f"Request to set dataset fields in {dataset_id} completed in {elapsed_time:.4f} seconds."
+    )
+
+    return response.json()
